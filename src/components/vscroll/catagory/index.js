@@ -2,7 +2,7 @@ import { CARD_MARGIN, CARD_WIDTH } from 'constants'
 import { forwardRef, useImperativeHandle, useState } from 'react'
 import { FlatList } from 'react-native'
 
-const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
+export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   const [numColumns, setNumColumns] = useState(1)
   const [data, setData] = useState([])
 
@@ -53,7 +53,7 @@ const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   return (
     <FlatList
       onLayout={onLayout}
-      data={data}
+      data={[...data, {}]}
       renderItem={renderItem}
       showsVerticalScrollIndicator={false}
       key={`CatagoryVerticalScrollView${numColumns}`}
@@ -63,5 +63,3 @@ const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   )
 })
 CatagoryVerticalScrollView.displayName = 'CatagoryVerticalScrollView'
-
-export default CatagoryVerticalScrollView

@@ -1,1 +1,1 @@
-export { default as CatagoryVerticalScrollView } from './catagory'
+export * from './catagory'

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import {
   CommCardContainerView,
@@ -8,7 +9,7 @@ import { StackHorizontalScrollView } from 'components/hscroll'
 import { BackspaceIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
 import { CatagoryVerticalScrollView } from 'components/vscroll'
-import { CARD_MARGIN, PADDING } from 'constants'
+import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
 import { useCallback, useEffect } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -42,19 +43,45 @@ const HomeScreenComponent = () => {
   }
 
   const CatagoryRenderItem = ({ item, index }) => {
-    const onPressStackPush = () => {
+    const onPressPushToStack = () => {
       stackRef.current?.push(item)
-      // if (item.audioUri) {
-      //   stackRef.current?.push(item)
-      // } else {
-      //   navigation.navigate({
-      //     name: 'Detail',
-      //   })
-      // }
+    }
+
+    const onPressNavigateToDetail = () => {
+      navigation.navigate({
+        name: 'Detail',
+        params: {
+          item,
+          index,
+        },
+      })
+    }
+
+    if (index === catagoryRef.current?.data.length) {
+      return (
+        <TouchableOpacity onPress={onPressNavigateToDetail}>
+          <CommCardContainerView
+            style={{
+              margin: CARD_MARGIN,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name='add-outline'
+              size={ICON_SIZE}
+              color='black'
+            />
+          </CommCardContainerView>
+        </TouchableOpacity>
+      )
     }
 
     return (
-      <TouchableOpacity onPress={onPressStackPush}>
+      <TouchableOpacity
+        onPress={onPressPushToStack}
+        onLongPress={onPressNavigateToDetail}
+      >
         <CommCardContainerView style={{ margin: CARD_MARGIN }}>
           <CommCardImageView source={item.imageUri} />
           <CommCardTextView text={item.text} />
