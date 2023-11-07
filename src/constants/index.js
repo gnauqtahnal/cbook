@@ -2,10 +2,9 @@ import { Dimensions } from 'react-native'
 
 export const { height: WINDOW_HEIGHT, width: WINDOW_WIDTH } =
   Dimensions.get('window')
-console.log(WINDOW_WIDTH)
 
 export const PADDING = 5
-export const BORDER_COLOR = 'rgba(0,0,0,0.3)'
+export const BORDER_COLOR = 'rgba(0,0,0,0.5)'
 
 export const CARD_PADDING = PADDING
 const CARD_NUM_COLUMNS =
@@ -20,8 +19,11 @@ export const CARD_BORDER_COLOR = BORDER_COLOR
 export const CARD_BACKGROUND = 'white'
 export const CARD_FONTSIZE = 11
 
-export const ICON_SIZE = 26
+export const ICON_SIZE = 30
 export const ICON_PADDING = 5
 export const ICON_BACKGROUND = 'rgba(0,0,0,0.7)'
 export const ICON_COLOR = 'black'
 export const ICON_BORDER_COLOR = BORDER_COLOR
+
+export const RESIZE_WIDTH = 256
+export const RESIZE_HEIGHT = 256

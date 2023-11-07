@@ -10,14 +10,14 @@ import { BackspaceIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
 import { CatagoryVerticalScrollView } from 'components/vscroll'
 import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { HomeScreenProvider } from './contexts'
-import { useHomeScreen } from './hooks'
-const HomeScreenComponent = () => {
+
+const HomeScreen = () => {
   const navigation = useNavigation()
-  const { stackRef, catagoryRef } = useHomeScreen()
+  const stackRef = useRef()
+  const catagoryRef = useRef()
 
   useEffect(() => {
     const data = [
@@ -33,7 +33,7 @@ const HomeScreenComponent = () => {
     })
   }, [])
 
-  const StackRenderItem = ({ item, index }) => {
+  const StackRenderItem = ({ item }) => {
     return (
       <CommCardContainerView style={{ margin: CARD_MARGIN }}>
         <CommCardImageView source={item.imageUri} />
@@ -48,12 +48,9 @@ const HomeScreenComponent = () => {
     }
 
     const onPressNavigateToDetail = () => {
-      navigation.navigate({
-        name: 'Detail',
-        params: {
-          item,
-          index,
-        },
+      navigation.navigate('Detail', {
+        item,
+        index,
       })
     }
 
@@ -133,14 +130,6 @@ const HomeScreenComponent = () => {
         />
       </View>
     </SafeAreaView>
-  )
-}
-
-const HomeScreen = () => {
-  return (
-    <HomeScreenProvider>
-      <HomeScreenComponent />
-    </HomeScreenProvider>
   )
 }
 
