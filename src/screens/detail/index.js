@@ -4,7 +4,7 @@ import {
   CommCardImageView,
   CommCardTextView,
 } from 'components/card'
-import { CircleIcon } from 'components/icons'
+import { CircleIcon, Icon } from 'components/icons'
 import { keygen } from 'components/keygen'
 import {
   CARD_MARGIN,
@@ -13,9 +13,10 @@ import {
   RESIZE_HEIGHT,
   RESIZE_WIDTH,
 } from 'constants'
+import { Audio } from 'expo-av'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
-import { useReducer, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -63,7 +64,25 @@ const DetailScreen = () => {
     text: route.params.item.text,
   })
 
-  console.log(JSON.stringify(state, null, 2))
+  useEffect(() => {
+    if (state.audioUri) {
+      Audio.Sound.createAsync({ uri: state.audioUri })
+        .then(({ sound }) => {
+          setSound(sound)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+  }, [state.audioUri])
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync()
+        }
+      : undefined
+  }, [sound])
 
   const onPressPickImageFromCamera = async () => {
     try {
@@ -104,6 +123,48 @@ const DetailScreen = () => {
     }
   }
 
+  const onPressStartRecording = async () => {
+    try {
+      await Audio.requestPermissionsAsync()
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      })
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      )
+
+      setRecording(recording)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onPressStopRecording = async () => {
+    try {
+      setRecording(undefined)
+
+      await recording.stopAndUnloadAsync()
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      })
+
+      const uri = recording.getURI()
+
+      dispatch({ audioUri: uri })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onPressPlaySound = async () => {
+    if (sound) {
+      await sound.stopAsync()
+      await sound.replayAsync()
+    }
+  }
+
   const onPressSubmit = async () => {
     navigation.goBack()
   }
@@ -121,6 +182,20 @@ const DetailScreen = () => {
           <CommCardImageView source={state.imageUri} />
           <CommCardTextView text={state.text} />
         </CommCardContainerView>
+
+        {sound ? (
+          <Icon
+            name='ios-volume-high-outline'
+            style={{ position: 'absolute', top: -15 }}
+            iconColor='green'
+          />
+        ) : (
+          <Icon
+            name='ios-volume-mute-outline'
+            style={{ position: 'absolute', top: -15 }}
+            iconColor='red'
+          />
+        )}
 
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row' }}>
@@ -145,17 +220,29 @@ const DetailScreen = () => {
 
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1 }}>
-              <TouchableOpacity onPress={null}>
+              <TouchableOpacity
+                onPress={onPressStartRecording}
+                disabled={!recording ? false : true}
+              >
                 <CircleIcon
                   name='ios-mic-outline'
-                  style={{ margin: CARD_MARGIN }}
+                  style={
+                    !recording
+                      ? { margin: CARD_MARGIN }
+                      : {
+                          margin: CARD_MARGIN,
+                          borderColor: DISABLE_COLOR,
+                          backgroundColor: DISABLE_COLOR,
+                        }
+                  }
+                  iconColor={!recording ? undefined : DISABLE_COLOR}
                 />
               </TouchableOpacity>
             </View>
 
             <View style={{ flex: 1 }}>
               <TouchableOpacity
-                onPress={null}
+                onPress={onPressStopRecording}
                 disabled={recording ? false : true}
               >
                 <CircleIcon
@@ -178,7 +265,7 @@ const DetailScreen = () => {
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity
-                onPress={null}
+                onPress={onPressPlaySound}
                 disabled={sound ? false : true}
               >
                 <CircleIcon
