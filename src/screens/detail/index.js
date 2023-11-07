@@ -12,10 +12,11 @@ import {
   StopIcon,
   TextIcon,
 } from 'components/icons'
+import { keygen } from 'components/keygen'
 import { CARD_MARGIN, PADDING, RESIZE_HEIGHT, RESIZE_WIDTH } from 'constants'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -26,13 +27,42 @@ const imagePickerOptions = {
   quality: 1,
 }
 
+const reducer = (state, action) => {
+  if (action.key) {
+    return { ...state, key: action.key }
+  }
+
+  if (action.imageUri) {
+    return { ...state, imageUri: action.imageUri }
+  }
+
+  if (action.audioUri) {
+    return { ...state, audioUri: action.audioUri }
+  }
+
+  if (action.text) {
+    return { ...state, text: action.text }
+  }
+
+  return state
+}
+
 const DetailScreen = () => {
   const route = useRoute()
   const navigation = useNavigation()
 
-  const [imageUri, setImageUri] = useState(route.params.item.imageUri)
-  const [audioUri, setAudioUri] = useState(route.params.item.audioUri)
-  const [text, setText] = useState(route.params.item.text)
+  // const [imageUri, setImageUri] = useState(route.params.item.imageUri)
+  // const [audioUri, setAudioUri] = useState(route.params.item.audioUri)
+  // const [text, setText] = useState(route.params.item.text)
+  const [openInputText, setOpenInputText] = useState(false)
+  const [state, dispatch] = useReducer(reducer, {
+    key: route.params.item.key || keygen(),
+    imageUri: route.params.item.imageUri,
+    audioUri: route.params.item.audioUri,
+    text: route.params.item.text,
+  })
+
+  console.log(JSON.stringify(state, null, 2))
 
   const onPressPickImageFromCamera = async () => {
     try {
@@ -46,7 +76,8 @@ const DetailScreen = () => {
           { compress: 1, format: SaveFormat.JPEG }
         )
 
-        setImageUri(uri)
+        // setImageUri(uri)
+        dispatch({ imageUri: uri })
       }
     } catch (error) {
       console.error(error)
@@ -66,7 +97,8 @@ const DetailScreen = () => {
           { compress: 1, format: SaveFormat.JPEG }
         )
 
-        setImageUri(uri)
+        // setImageUri(uri)
+        dispatch({ imageUri: uri })
       }
     } catch (error) {
       console.error(error)
@@ -87,8 +119,8 @@ const DetailScreen = () => {
         }}
       >
         <CommCardContainerView style={{ margin: CARD_MARGIN }}>
-          <CommCardImageView source={imageUri} />
-          <CommCardTextView text={text} />
+          <CommCardImageView source={state.imageUri} />
+          <CommCardTextView text={state.text} />
         </CommCardContainerView>
 
         <View style={{ flex: 1 }}>

@@ -16,6 +16,7 @@ const Navigation = () => {
         <Stack.Screen
           name='Detail'
           component={DetailScreen}
+          options={{ presentation: 'modal' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -10,7 +10,7 @@ import { BackspaceIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
 import { CatagoryVerticalScrollView } from 'components/vscroll'
 import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -18,20 +18,6 @@ const HomeScreen = () => {
   const navigation = useNavigation()
   const stackRef = useRef()
   const catagoryRef = useRef()
-
-  useEffect(() => {
-    const data = [
-      { imageUri: 'https://picsum.photos/200/300?random=1', text: 'PicSum 1' },
-      { imageUri: 'https://picsum.photos/200/300?random=2', text: 'PicSum 2' },
-      { imageUri: 'https://picsum.photos/200/300?random=3', text: 'PicSum 3' },
-      { imageUri: 'https://picsum.photos/200/300?random=4', text: 'PicSum 4' },
-      { imageUri: 'https://picsum.photos/200/300?random=5', text: 'PicSum 5' },
-    ]
-
-    data.forEach((item) => {
-      catagoryRef.current?.push(item)
-    })
-  }, [])
 
   const StackRenderItem = ({ item }) => {
     return (
@@ -56,7 +42,10 @@ const HomeScreen = () => {
 
     if (index === catagoryRef.current?.data.length) {
       return (
-        <TouchableOpacity onPress={onPressNavigateToDetail}>
+        <TouchableOpacity
+          onPress={onPressNavigateToDetail}
+          onLongPress={onPressNavigateToDetail}
+        >
           <CommCardContainerView
             style={{
               margin: CARD_MARGIN,
