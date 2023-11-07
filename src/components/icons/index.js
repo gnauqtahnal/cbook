@@ -18,6 +18,7 @@ const RoundIconContainerView = ({ children, style }) => {
           alignItems: 'center',
           justifyContent: 'center',
           borderColor: ICON_BORDER_COLOR,
+          backgroundColor: 'white',
         },
         style,
       ]}
@@ -27,86 +28,27 @@ const RoundIconContainerView = ({ children, style }) => {
   )
 }
 
-export const BackspaceIcon = ({ style, iconColor }) => {
+export const CircleIcon = ({ name, style, iconColor }) => {
   return (
-    <RoundIconContainerView style={style}>
+    <View
+      style={[
+        {
+          alignItems: 'center',
+          backgroundColor: 'white',
+          borderColor: ICON_BORDER_COLOR,
+          borderRadius: 9999,
+          borderWidth: 1,
+          justifyContent: 'center',
+          padding: ICON_PADDING,
+        },
+        style,
+      ]}
+    >
       <Ionicons
-        name='ios-backspace-outline'
+        name={name}
         size={ICON_SIZE}
         color={iconColor || ICON_COLOR}
       />
-    </RoundIconContainerView>
-  )
-}
-
-export const CameraIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-camera-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
-  )
-}
-
-export const ImageIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-image-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
-  )
-}
-
-export const CheckmarkIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-checkmark-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
-  )
-}
-
-export const TextIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-text-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
-  )
-}
-
-export const MicIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-mic-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
-  )
-}
-
-export const StopIcon = ({ style, iconColor }) => {
-  return (
-    <RoundIconContainerView style={style}>
-      <Ionicons
-        name='ios-stop-outline'
-        size={ICON_SIZE}
-        color={iconColor || ICON_COLOR}
-      />
-    </RoundIconContainerView>
+    </View>
   )
 }

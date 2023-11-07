@@ -4,16 +4,15 @@ import {
   CommCardImageView,
   CommCardTextView,
 } from 'components/card'
-import {
-  CameraIcon,
-  CheckmarkIcon,
-  ImageIcon,
-  MicIcon,
-  StopIcon,
-  TextIcon,
-} from 'components/icons'
+import { CircleIcon } from 'components/icons'
 import { keygen } from 'components/keygen'
-import { CARD_MARGIN, PADDING, RESIZE_HEIGHT, RESIZE_WIDTH } from 'constants'
+import {
+  CARD_MARGIN,
+  DISABLE_COLOR,
+  PADDING,
+  RESIZE_HEIGHT,
+  RESIZE_WIDTH,
+} from 'constants'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { useReducer, useState } from 'react'
@@ -51,10 +50,12 @@ const DetailScreen = () => {
   const route = useRoute()
   const navigation = useNavigation()
 
-  // const [imageUri, setImageUri] = useState(route.params.item.imageUri)
-  // const [audioUri, setAudioUri] = useState(route.params.item.audioUri)
-  // const [text, setText] = useState(route.params.item.text)
   const [openInputText, setOpenInputText] = useState(false)
+
+  const [recording, setRecording] = useState(undefined)
+
+  const [sound, setSound] = useState(undefined)
+
   const [state, dispatch] = useReducer(reducer, {
     key: route.params.item.key || keygen(),
     imageUri: route.params.item.imageUri,
@@ -76,7 +77,6 @@ const DetailScreen = () => {
           { compress: 1, format: SaveFormat.JPEG }
         )
 
-        // setImageUri(uri)
         dispatch({ imageUri: uri })
       }
     } catch (error) {
@@ -97,7 +97,6 @@ const DetailScreen = () => {
           { compress: 1, format: SaveFormat.JPEG }
         )
 
-        // setImageUri(uri)
         dispatch({ imageUri: uri })
       }
     } catch (error) {
@@ -127,13 +126,19 @@ const DetailScreen = () => {
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity onPress={onPressPickImageFromCamera}>
-                <CameraIcon style={{ margin: CARD_MARGIN }} />
+                <CircleIcon
+                  name='ios-camera-outline'
+                  style={{ margin: CARD_MARGIN }}
+                />
               </TouchableOpacity>
             </View>
 
             <View style={{ flex: 1 }}>
               <TouchableOpacity onPress={onPressPickImageFromLibrary}>
-                <ImageIcon style={{ margin: CARD_MARGIN }} />
+                <CircleIcon
+                  name='ios-image-outline'
+                  style={{ margin: CARD_MARGIN }}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -141,13 +146,54 @@ const DetailScreen = () => {
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity onPress={null}>
-                <MicIcon style={{ margin: CARD_MARGIN }} />
+                <CircleIcon
+                  name='ios-mic-outline'
+                  style={{ margin: CARD_MARGIN }}
+                />
               </TouchableOpacity>
             </View>
 
             <View style={{ flex: 1 }}>
-              <TouchableOpacity onPress={null}>
-                <StopIcon style={{ margin: CARD_MARGIN }} />
+              <TouchableOpacity
+                onPress={null}
+                disabled={recording ? false : true}
+              >
+                <CircleIcon
+                  name='ios-stop-outline'
+                  style={
+                    recording
+                      ? { margin: CARD_MARGIN }
+                      : {
+                          margin: CARD_MARGIN,
+                          borderColor: DISABLE_COLOR,
+                          backgroundColor: DISABLE_COLOR,
+                        }
+                  }
+                  iconColor={recording ? undefined : DISABLE_COLOR}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity
+                onPress={null}
+                disabled={sound ? false : true}
+              >
+                <CircleIcon
+                  name='ios-play-outline'
+                  style={
+                    sound
+                      ? { margin: CARD_MARGIN }
+                      : {
+                          margin: CARD_MARGIN,
+                          borderColor: DISABLE_COLOR,
+                          backgroundColor: DISABLE_COLOR,
+                        }
+                  }
+                  iconColor={sound ? undefined : DISABLE_COLOR}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -155,23 +201,29 @@ const DetailScreen = () => {
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity onPress={null}>
-                <TextIcon style={{ margin: CARD_MARGIN }} />
+                <CircleIcon
+                  name='ios-text-outline'
+                  style={{ margin: CARD_MARGIN }}
+                />
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </View>
 
-      <TouchableOpacity onPress={onPressSubmit}>
-        <CheckmarkIcon
-          style={{
-            margin: CARD_MARGIN,
-            backgroundColor: 'rgba(0,128,0,0.1)',
-            borderColor: 'green',
-          }}
-          iconColor='green'
-        />
-      </TouchableOpacity>
+      <View style={{ paddingHorizontal: PADDING }}>
+        <TouchableOpacity onPress={onPressSubmit}>
+          <CircleIcon
+            name='ios-checkmark-outline'
+            style={{
+              margin: CARD_MARGIN,
+              backgroundColor: 'rgba(0,128,0,0.1)',
+              borderColor: 'green',
+            }}
+            iconColor='green'
+          />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   )
 }

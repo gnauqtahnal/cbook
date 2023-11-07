@@ -6,7 +6,7 @@ import {
   CommCardTextView,
 } from 'components/card'
 import { StackHorizontalScrollView } from 'components/hscroll'
-import { BackspaceIcon } from 'components/icons'
+import { CircleIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
 import { CatagoryVerticalScrollView } from 'components/vscroll'
 import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
@@ -99,7 +99,10 @@ const HomeScreen = () => {
           onPress={backspaceOnPress}
           onLongPress={backspaceOnLongPress}
         >
-          <BackspaceIcon style={{ margin: PADDING, marginBottom: 0 }} />
+          <CircleIcon
+            name='ios-backspace-outline'
+            style={{ margin: PADDING, marginBottom: 0 }}
+          />
         </TouchableOpacity>
       </View>
 

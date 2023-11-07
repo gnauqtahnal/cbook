@@ -5,6 +5,7 @@ export const { height: WINDOW_HEIGHT, width: WINDOW_WIDTH } =
 
 export const PADDING = 5
 export const BORDER_COLOR = 'rgba(0,0,0,0.5)'
+export const DISABLE_COLOR = 'rgba(0,0,0,0.1)'
 
 export const CARD_PADDING = PADDING
 const CARD_NUM_COLUMNS =
