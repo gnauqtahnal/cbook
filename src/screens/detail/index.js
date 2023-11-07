@@ -7,6 +7,8 @@ import {
 import { CircleIcon, Icon } from 'components/icons'
 import { keygen } from 'components/keygen'
 import {
+  BORDER_COLOR,
+  CARD_BORDER_RADIUS,
   CARD_MARGIN,
   DISABLE_COLOR,
   PADDING,
@@ -17,8 +19,14 @@ import { Audio } from 'expo-av'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { useEffect, useReducer, useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import {
+  KeyboardAvoidingView,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 
 const imagePickerOptions = {
   mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -40,7 +48,7 @@ const reducer = (state, action) => {
     return { ...state, audioUri: action.audioUri }
   }
 
-  if (action.text) {
+  if (action.text || action.text === '') {
     return { ...state, text: action.text }
   }
 
@@ -52,6 +60,7 @@ const DetailScreen = () => {
   const navigation = useNavigation()
 
   const [openInputText, setOpenInputText] = useState(false)
+  // const textInputRef = useRef(null)
 
   const [recording, setRecording] = useState(undefined)
 
@@ -165,153 +174,211 @@ const DetailScreen = () => {
     }
   }
 
+  const onPressOpenTextInput = () => {
+    setOpenInputText(true)
+  }
+
+  const onPressCloseTextInput = () => {
+    setOpenInputText(false)
+    // dispatch({ text: textInputRef.current?.value })
+  }
+
   const onPressSubmit = async () => {
     navigation.goBack()
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          width: '100%',
-          flexDirection: 'row',
-          paddingHorizontal: PADDING,
-        }}
-      >
-        <CommCardContainerView style={{ margin: CARD_MARGIN }}>
-          <CommCardImageView source={state.imageUri} />
-          <CommCardTextView text={state.text} />
-        </CommCardContainerView>
+    <>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            paddingHorizontal: PADDING,
+          }}
+        >
+          <CommCardContainerView style={{ margin: CARD_MARGIN }}>
+            <CommCardImageView source={state.imageUri} />
+            <CommCardTextView text={state.text} />
+          </CommCardContainerView>
 
-        {sound ? (
-          <Icon
-            name='ios-volume-high-outline'
-            style={{ position: 'absolute', top: -15 }}
-            iconColor='green'
-          />
-        ) : (
-          <Icon
-            name='ios-volume-mute-outline'
-            style={{ position: 'absolute', top: -15 }}
-            iconColor='red'
-          />
-        )}
+          {sound ? (
+            <Icon
+              name='ios-volume-high-outline'
+              style={{ position: 'absolute', top: -15 }}
+              iconColor='green'
+            />
+          ) : (
+            <Icon
+              name='ios-volume-mute-outline'
+              style={{ position: 'absolute', top: -15 }}
+              iconColor='red'
+            />
+          )}
 
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity onPress={onPressPickImageFromCamera}>
-                <CircleIcon
-                  name='ios-camera-outline'
-                  style={{ margin: CARD_MARGIN }}
-                />
-              </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={onPressPickImageFromCamera}>
+                  <CircleIcon
+                    name='ios-camera-outline'
+                    style={{ margin: CARD_MARGIN }}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={onPressPickImageFromLibrary}>
+                  <CircleIcon
+                    name='ios-image-outline'
+                    style={{ margin: CARD_MARGIN }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity onPress={onPressPickImageFromLibrary}>
-                <CircleIcon
-                  name='ios-image-outline'
-                  style={{ margin: CARD_MARGIN }}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity
+                  onPress={onPressStartRecording}
+                  disabled={!recording ? false : true}
+                >
+                  <CircleIcon
+                    name='ios-mic-outline'
+                    style={
+                      !recording
+                        ? { margin: CARD_MARGIN }
+                        : {
+                            margin: CARD_MARGIN,
+                            borderColor: DISABLE_COLOR,
+                            backgroundColor: DISABLE_COLOR,
+                          }
+                    }
+                    iconColor={!recording ? undefined : DISABLE_COLOR}
+                  />
+                </TouchableOpacity>
+              </View>
 
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={onPressStartRecording}
-                disabled={!recording ? false : true}
-              >
-                <CircleIcon
-                  name='ios-mic-outline'
-                  style={
-                    !recording
-                      ? { margin: CARD_MARGIN }
-                      : {
-                          margin: CARD_MARGIN,
-                          borderColor: DISABLE_COLOR,
-                          backgroundColor: DISABLE_COLOR,
-                        }
-                  }
-                  iconColor={!recording ? undefined : DISABLE_COLOR}
-                />
-              </TouchableOpacity>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity
+                  onPress={onPressStopRecording}
+                  disabled={recording ? false : true}
+                >
+                  <CircleIcon
+                    name='ios-stop-outline'
+                    style={
+                      recording
+                        ? { margin: CARD_MARGIN }
+                        : {
+                            margin: CARD_MARGIN,
+                            borderColor: DISABLE_COLOR,
+                            backgroundColor: DISABLE_COLOR,
+                          }
+                    }
+                    iconColor={recording ? undefined : DISABLE_COLOR}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={onPressStopRecording}
-                disabled={recording ? false : true}
-              >
-                <CircleIcon
-                  name='ios-stop-outline'
-                  style={
-                    recording
-                      ? { margin: CARD_MARGIN }
-                      : {
-                          margin: CARD_MARGIN,
-                          borderColor: DISABLE_COLOR,
-                          backgroundColor: DISABLE_COLOR,
-                        }
-                  }
-                  iconColor={recording ? undefined : DISABLE_COLOR}
-                />
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity
+                  onPress={onPressPlaySound}
+                  disabled={sound ? false : true}
+                >
+                  <CircleIcon
+                    name='ios-play-outline'
+                    style={
+                      sound
+                        ? { margin: CARD_MARGIN }
+                        : {
+                            margin: CARD_MARGIN,
+                            borderColor: DISABLE_COLOR,
+                            backgroundColor: DISABLE_COLOR,
+                          }
+                    }
+                    iconColor={sound ? undefined : DISABLE_COLOR}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
 
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={onPressPlaySound}
-                disabled={sound ? false : true}
-              >
-                <CircleIcon
-                  name='ios-play-outline'
-                  style={
-                    sound
-                      ? { margin: CARD_MARGIN }
-                      : {
-                          margin: CARD_MARGIN,
-                          borderColor: DISABLE_COLOR,
-                          backgroundColor: DISABLE_COLOR,
-                        }
-                  }
-                  iconColor={sound ? undefined : DISABLE_COLOR}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity onPress={null}>
-                <CircleIcon
-                  name='ios-text-outline'
-                  style={{ margin: CARD_MARGIN }}
-                />
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={onPressOpenTextInput}>
+                  <CircleIcon
+                    name='ios-text-outline'
+                    style={{ margin: CARD_MARGIN }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      <View style={{ paddingHorizontal: PADDING }}>
-        <TouchableOpacity onPress={onPressSubmit}>
-          <CircleIcon
-            name='ios-checkmark-outline'
-            style={{
-              margin: CARD_MARGIN,
-              backgroundColor: 'rgba(0,128,0,0.1)',
-              borderColor: 'green',
-            }}
-            iconColor='green'
-          />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <View style={{ paddingHorizontal: PADDING }}>
+          <TouchableOpacity onPress={onPressSubmit}>
+            <CircleIcon
+              name='ios-checkmark-outline'
+              style={{
+                margin: CARD_MARGIN,
+                backgroundColor: 'rgba(0,128,0,0.1)',
+                borderColor: 'green',
+              }}
+              iconColor='green'
+            />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
+      <Modal
+        visible={openInputText}
+        animationType='slide'
+        transparent
+      >
+        <SafeAreaProvider>
+          <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+            <View style={{ flex: 1 }} />
+
+            <KeyboardAvoidingView behavior='position'>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderRadius: CARD_BORDER_RADIUS,
+                  margin: PADDING * 2,
+                  borderColor: BORDER_COLOR,
+                  backgroundColor: 'white',
+                }}
+              >
+                <View style={{ flexDirection: 'row' }}>
+                  <TextInput
+                    // ref={textInputRef}
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                      height: '100%',
+                      padding: PADDING,
+                    }}
+                    onChangeText={(text) => {
+                      dispatch({ text: text })
+                    }}
+                    autoFocus
+                  />
+
+                  <TouchableOpacity onPress={onPressCloseTextInput}>
+                    <CircleIcon
+                      name='ios-checkmark-outline'
+                      style={{ margin: CARD_MARGIN }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </Modal>
+    </>
   )
 }
 
