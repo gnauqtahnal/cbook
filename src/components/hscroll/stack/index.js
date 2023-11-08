@@ -38,6 +38,9 @@ const StackHorizontalScrollView = forwardRef(({ renderItem }, ref) => {
       horizontal
       ListEmptyComponent={EmptyView}
       showsHorizontalScrollIndicator={false}
+      keyExtractor={(item, index) => {
+        return `Stack${item.key}${index}`
+      }}
     />
   )
 })

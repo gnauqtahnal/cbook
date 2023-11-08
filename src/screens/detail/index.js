@@ -6,6 +6,7 @@ import {
 } from 'components/card'
 import { CircleIcon, Icon } from 'components/icons'
 import { keygen } from 'components/keygen'
+import { useCatagoryVerticalScroll } from 'components/vscroll'
 import {
   BORDER_COLOR,
   CARD_BORDER_RADIUS,
@@ -58,19 +59,16 @@ const reducer = (state, action) => {
 const DetailScreen = () => {
   const route = useRoute()
   const navigation = useNavigation()
-
+  const { item, index } = route.params
+  const { ref: catagoryRef } = useCatagoryVerticalScroll()
   const [openInputText, setOpenInputText] = useState(false)
-  // const textInputRef = useRef(null)
-
   const [recording, setRecording] = useState(undefined)
-
   const [sound, setSound] = useState(undefined)
-
   const [state, dispatch] = useReducer(reducer, {
-    key: route.params.item.key || keygen(),
-    imageUri: route.params.item.imageUri,
-    audioUri: route.params.item.audioUri,
-    text: route.params.item.text,
+    key: item.key || keygen(),
+    imageUri: item.imageUri,
+    audioUri: item.audioUri,
+    text: item.text,
   })
 
   useEffect(() => {
@@ -180,10 +178,15 @@ const DetailScreen = () => {
 
   const onPressCloseTextInput = () => {
     setOpenInputText(false)
-    // dispatch({ text: textInputRef.current?.value })
   }
 
   const onPressSubmit = async () => {
+    if (index >= catagoryRef.current?.data.length) {
+      catagoryRef.current?.push(state)
+    } else {
+      catagoryRef.current?.update(index, state)
+    }
+
     navigation.goBack()
   }
 
@@ -353,7 +356,6 @@ const DetailScreen = () => {
               >
                 <View style={{ flexDirection: 'row' }}>
                   <TextInput
-                    // ref={textInputRef}
                     style={{
                       flex: 1,
                       width: '100%',

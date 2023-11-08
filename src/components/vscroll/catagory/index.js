@@ -1,10 +1,44 @@
 import { CARD_MARGIN, CARD_WIDTH } from 'constants'
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import {
+  createContext,
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { FlatList } from 'react-native'
+
+export const CatagoryVerticalScrollContext = createContext(null)
+
+export const useCatagoryVerticalScroll = () => {
+  return useContext(CatagoryVerticalScrollContext)
+}
+
+export const CatagoryVerticalScrollProvider = ({ children }) => {
+  const ref = useRef(null)
+
+  const value = useMemo(() => {
+    return { ref }
+  }, [ref])
+
+  return (
+    <CatagoryVerticalScrollContext.Provider value={value}>
+      {children}
+    </CatagoryVerticalScrollContext.Provider>
+  )
+}
 
 export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   const [numColumns, setNumColumns] = useState(1)
   const [data, setData] = useState([])
+  const [extraData, setExtraData] = useState(data)
+
+  useEffect(() => {
+    setExtraData([...data, {}])
+  }, [data])
 
   const push = (element) => {
     setData((prevData) => {
@@ -26,7 +60,9 @@ export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
 
   const update = (index, element) => {
     setData((prevData) => {
-      return [...prevData.splice(index, 1, element)]
+      const newData = [...prevData]
+      newData[index] = element
+      return newData
     })
   }
 
@@ -53,12 +89,14 @@ export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   return (
     <FlatList
       onLayout={onLayout}
-      data={[...data, {}]}
+      data={extraData}
       renderItem={renderItem}
       showsVerticalScrollIndicator={false}
       key={`CatagoryVerticalScrollView${numColumns}`}
       numColumns={numColumns}
-      keyExtractor={(_, index) => `CatagoryVerticalScrollView${index}`}
+      keyExtractor={(item, index) => {
+        return `Catagory${item.key}${index}`
+      }}
     />
   )
 })

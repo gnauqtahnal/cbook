@@ -8,7 +8,10 @@ import {
 import { StackHorizontalScrollView } from 'components/hscroll'
 import { CircleIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
-import { CatagoryVerticalScrollView } from 'components/vscroll'
+import {
+  CatagoryVerticalScrollView,
+  useCatagoryVerticalScroll,
+} from 'components/vscroll'
 import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
 import { useCallback, useRef } from 'react'
 import { TouchableOpacity, View } from 'react-native'
@@ -17,7 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const HomeScreen = () => {
   const navigation = useNavigation()
   const stackRef = useRef()
-  const catagoryRef = useRef()
+  const { ref: catagoryRef } = useCatagoryVerticalScroll()
 
   const StackRenderItem = ({ item }) => {
     return (
