@@ -62,6 +62,7 @@ const DetailScreen = () => {
   const { item, index } = route.params
   const { ref: catagoryRef } = useCatagoryVerticalScroll()
   const [openInputText, setOpenInputText] = useState(false)
+  const [submitable, setSubmitable] = useState(false)
   const [recording, setRecording] = useState(undefined)
   const [sound, setSound] = useState(undefined)
   const [state, dispatch] = useReducer(reducer, {
@@ -82,6 +83,14 @@ const DetailScreen = () => {
         })
     }
   }, [state.audioUri])
+
+  useEffect(() => {
+    if (state.key && state.imageUri && state.audioUri && state.text) {
+      setSubmitable(true)
+    } else {
+      setSubmitable(false)
+    }
+  }, [state])
 
   useEffect(() => {
     return sound
@@ -321,15 +330,26 @@ const DetailScreen = () => {
         </View>
 
         <View style={{ paddingHorizontal: PADDING }}>
-          <TouchableOpacity onPress={onPressSubmit}>
+          <TouchableOpacity
+            onPress={onPressSubmit}
+            disabled={submitable ? false : true}
+          >
             <CircleIcon
               name='ios-checkmark-outline'
-              style={{
-                margin: CARD_MARGIN,
-                backgroundColor: 'rgba(0,128,0,0.1)',
-                borderColor: 'green',
-              }}
-              iconColor='green'
+              style={
+                submitable
+                  ? {
+                      margin: CARD_MARGIN,
+                      backgroundColor: 'rgba(0,128,0,0.1)',
+                      borderColor: 'green',
+                    }
+                  : {
+                      margin: CARD_MARGIN,
+                      borderColor: DISABLE_COLOR,
+                      backgroundColor: DISABLE_COLOR,
+                    }
+              }
+              iconColor={submitable ? 'green' : DISABLE_COLOR}
             />
           </TouchableOpacity>
         </View>
