@@ -1,13 +1,16 @@
 import { CatagoryVerticalScrollProvider } from 'components/vscroll'
+import { UserProvider } from 'contexts'
 import { StatusBar } from 'expo-status-bar'
 import Navigation from './navigations'
 
 const AppProvider = ({ children }) => {
   return (
     <>
-      <CatagoryVerticalScrollProvider>
-        {children}
-      </CatagoryVerticalScrollProvider>
+      <UserProvider>
+        <CatagoryVerticalScrollProvider>
+          {children}
+        </CatagoryVerticalScrollProvider>
+      </UserProvider>
     </>
   )
 }
