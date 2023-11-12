@@ -5,6 +5,7 @@ import {
   CommCardImageView,
   CommCardTextView,
 } from 'components/card'
+import { CommCardPlaySoundPressable } from 'components/card/comm/play-sound-pressable'
 import { StackHorizontalScrollView } from 'components/hscroll'
 import { CircleIcon } from 'components/icons'
 import { HSeparator } from 'components/separator'
@@ -17,19 +18,21 @@ import { useCallback, useRef } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const HomeScreen = () => {
-  const navigation = useNavigation()
-  const stackRef = useRef()
-  const { ref: catagoryRef } = useCatagoryVerticalScroll()
-
-  const StackRenderItem = ({ item }) => {
-    return (
+const StackRenderItem = ({ item }) => {
+  return (
+    <CommCardPlaySoundPressable audioUri={item.audioUri}>
       <CommCardContainerView style={{ margin: CARD_MARGIN }}>
         <CommCardImageView source={item.imageUri} />
         <CommCardTextView text={item.text} />
       </CommCardContainerView>
-    )
-  }
+    </CommCardPlaySoundPressable>
+  )
+}
+
+const HomeScreen = () => {
+  const navigation = useNavigation()
+  const stackRef = useRef()
+  const { ref: catagoryRef } = useCatagoryVerticalScroll()
 
   const CatagoryRenderItem = ({ item, index }) => {
     const onPressPushToStack = () => {

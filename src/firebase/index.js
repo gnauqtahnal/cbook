@@ -2,7 +2,12 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage'
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -22,3 +27,36 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
+
+const createBlobAsync = async (uri) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.onload = () => {
+      try {
+        resolve(xhr.response)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    xhr.onerror = (e) => {
+      console.error(e)
+      reject(new TypeError('Network request failed'))
+    }
+    xhr.responseType = 'blob'
+    xhr.open('GET', uri, true)
+    xhr.send(null)
+  })
+}
+
+export const uploadStorageAsync = async (path, uri) => {
+  try {
+    const blob = await createBlobAsync(uri)
+    const storageRef = ref(storage, path)
+    await uploadBytesResumable(storageRef, blob)
+    const url = await getDownloadURL(storageRef)
+
+    return url
+  } catch {
+    return undefined
+  }
+}

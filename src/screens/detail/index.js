@@ -20,9 +20,8 @@ import { useUser } from 'contexts'
 import { Audio } from 'expo-av'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
-import { db, storage } from 'firebase'
+import { db, uploadStorageAsync } from 'firebase'
 import { doc, setDoc } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 import { useEffect, useReducer, useState } from 'react'
 import {
   KeyboardAvoidingView,
@@ -45,37 +44,7 @@ const uploadDbAsync = async (path, data) => {
   await setDoc(ref, data, { merge: true })
 }
 
-const uploadStorageAsync = async (path, uri) => {
-  try {
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      xhr.onload = () => {
-        try {
-          resolve(xhr.response)
-        } catch (error) {
-          console.error(error)
-        }
-      }
-      xhr.onerror = (e) => {
-        console.error(e)
-        reject(new TypeError('Network request failed'))
-      }
-      xhr.responseType = 'blob'
-      xhr.open('GET', uri, true)
-      xhr.send(null)
-    })
-
-    const storageRef = ref(storage, path)
-    await uploadBytesResumable(storageRef, blob)
-    const url = await getDownloadURL(storageRef)
-
-    return url
-  } catch {
-    return undefined
-  }
-}
-
-const uploadStorageAllAsync = async ({ userId, imageUri, audioUri }) => {
+const uploadStorageAllAsync = async ({ id, key, imageUri, audioUri }) => {
   const getFileType = (uri) => {
     const uriParts = uri.split('.')
     const fileType = uriParts[uriParts.length - 1]
@@ -84,13 +53,13 @@ const uploadStorageAllAsync = async ({ userId, imageUri, audioUri }) => {
 
   const uploadImage = async () => {
     const type = getFileType(imageUri)
-    const path = `image_${userId}.${type}`
+    const path = `${id}/image_${key}.${type}`
     await uploadStorageAsync(path, imageUri)
   }
 
   const uploadAudio = async () => {
     const type = getFileType(audioUri)
-    const path = `audio_${userId}.${type}`
+    const path = `${id}/audio_${key}.${type}`
     await uploadStorageAsync(path, audioUri)
   }
 
@@ -237,9 +206,11 @@ const DetailScreen = () => {
   }
 
   const onPressPlaySound = async () => {
-    if (sound) {
+    try {
       await sound.stopAsync()
       await sound.replayAsync()
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -253,19 +224,20 @@ const DetailScreen = () => {
 
   const onPressSubmit = async () => {
     const [imageUri, audioUri] = await uploadStorageAllAsync({
-      userId: id,
+      id: id,
+      key: state.key,
       imageUri: state.imageUri,
       audioUri: state.audioUri,
     })
-    const data = JSON.stringify({
-      index: {
-        text: state.text,
-        imageUri: imageUri,
-        audioUri: audioUri,
-      },
-    })
-    const path = `${id}`
-    await uploadDbAsync(path, data)
+    // const data = JSON.stringify({
+    //   index: {
+    //     text: state.text,
+    //     imageUri: imageUri,
+    //     audioUri: audioUri,
+    //   },
+    // })
+    // const path = `${id}`
+    // await uploadDbAsync(path, data)
 
     if (index >= catagoryRef.current?.data.length) {
       catagoryRef.current?.push(state)

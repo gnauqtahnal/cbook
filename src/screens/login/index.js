@@ -15,7 +15,7 @@ const listAvailableUser = []
 const LoginScreen = () => {
   const [isReady, setIsReady] = useState(false)
   const [openScanner, setOpenScanner] = useState(false)
-  const { setIsLogin } = useUser()
+  const { setIsLogin, setId } = useUser()
 
   useEffect(() => {
     signInAnonymously(auth)
@@ -23,6 +23,7 @@ const LoginScreen = () => {
         try {
           const storedUserId = JSON.parse(await AsyncStorage.getItem('userId'))
           console.log('userId:', storedUserId)
+          setId(storedUserId)
           const querySnapshot = await getDocs(collection(db, 'users'))
 
           try {
@@ -44,6 +45,7 @@ const LoginScreen = () => {
               } else {
                 if (storedUserId === data.id) {
                   AsyncStorage.removeItem('userId')
+                  setId(undefined)
                 }
               }
             })
@@ -93,6 +95,7 @@ const LoginScreen = () => {
             try {
               listAvailableUser.forEach(async (user) => {
                 if (data === user.id) {
+                  setId(user.id)
                   await AsyncStorage.setItem('userId', JSON.stringify(user.id))
 
                   setIsLogin(true)
