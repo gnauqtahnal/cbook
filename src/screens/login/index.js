@@ -2,15 +2,12 @@ import { CircleIcon } from 'components/icons'
 import { PADDING } from 'constants'
 import { useUser } from 'contexts'
 import { BarCodeScanner } from 'expo-barcode-scanner'
-import { app } from 'firebase'
-import { getAuth, signInAnonymously } from 'firebase/auth'
-import { collection, getDocs, getFirestore } from 'firebase/firestore'
+import { auth, db } from 'firebase'
+import { signInAnonymously } from 'firebase/auth'
+import { collection, getDocs } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-const auth = getAuth(app)
-const db = getFirestore(app)
 
 const listAvailableUser = []
 
@@ -22,11 +19,8 @@ const LoginScreen = () => {
   useEffect(() => {
     signInAnonymously(auth)
       .then(async () => {
-        // console.log('SignedInAsAnonymous')
-
         const querySnapshot = await getDocs(collection(db, 'users'))
         querySnapshot.forEach((doc) => {
-          // console.log(JSON.stringify(doc.data(), null, 2))
           const data = doc.data()
           listAvailableUser.push(data)
         })

@@ -16,9 +16,13 @@ import {
   RESIZE_HEIGHT,
   RESIZE_WIDTH,
 } from 'constants'
+import { useUser } from 'contexts'
 import { Audio } from 'expo-av'
 import { SaveFormat, manipulateAsync } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
+import { db, storage } from 'firebase'
+import { doc, setDoc } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 import { useEffect, useReducer, useState } from 'react'
 import {
   KeyboardAvoidingView,
@@ -34,6 +38,63 @@ const imagePickerOptions = {
   allowsEditing: true,
   aspect: [1, 1],
   quality: 1,
+}
+
+const uploadDbAsync = async (path, data) => {
+  const ref = doc(db, path)
+  await setDoc(ref, data, { merge: true })
+}
+
+const uploadStorageAsync = async (path, uri) => {
+  try {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.onload = () => {
+        try {
+          resolve(xhr.response)
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      xhr.onerror = (e) => {
+        console.error(e)
+        reject(new TypeError('Network request failed'))
+      }
+      xhr.responseType = 'blob'
+      xhr.open('GET', uri, true)
+      xhr.send(null)
+    })
+
+    const storageRef = ref(storage, path)
+    await uploadBytesResumable(storageRef, blob)
+    const url = await getDownloadURL(storageRef)
+
+    return url
+  } catch {
+    return undefined
+  }
+}
+
+const uploadStorageAllAsync = async ({ userId, imageUri, audioUri }) => {
+  const getFileType = (uri) => {
+    const uriParts = uri.split('.')
+    const fileType = uriParts[uriParts.length - 1]
+    return fileType
+  }
+
+  const uploadImage = async () => {
+    const type = getFileType(imageUri)
+    const path = `image_${userId}.${type}`
+    await uploadStorageAsync(path, imageUri)
+  }
+
+  const uploadAudio = async () => {
+    const type = getFileType(audioUri)
+    const path = `audio_${userId}.${type}`
+    await uploadStorageAsync(path, audioUri)
+  }
+
+  return await Promise.all([uploadImage(), uploadAudio()])
 }
 
 const reducer = (state, action) => {
@@ -59,6 +120,7 @@ const reducer = (state, action) => {
 const DetailScreen = () => {
   const route = useRoute()
   const navigation = useNavigation()
+  const { id } = useUser()
   const { item, index } = route.params
   const { ref: catagoryRef } = useCatagoryVerticalScroll()
   const [openInputText, setOpenInputText] = useState(false)
@@ -190,6 +252,21 @@ const DetailScreen = () => {
   }
 
   const onPressSubmit = async () => {
+    const [imageUri, audioUri] = await uploadStorageAllAsync({
+      userId: id,
+      imageUri: state.imageUri,
+      audioUri: state.audioUri,
+    })
+    const data = JSON.stringify({
+      index: {
+        text: state.text,
+        imageUri: imageUri,
+        audioUri: audioUri,
+      },
+    })
+    const path = `${id}`
+    await uploadDbAsync(path, data)
+
     if (index >= catagoryRef.current?.data.length) {
       catagoryRef.current?.push(state)
     } else {
