@@ -11,4 +11,5 @@ module.exports = {
     'prettier-plugin-organize-attributes',
     'prettier-plugin-style-order',
   ],
+  organizeImportsSkipDestructiveCodeActions: true,
 }

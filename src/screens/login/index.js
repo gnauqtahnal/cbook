@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CircleIcon } from 'components/icons'
 import { PADDING } from 'constants'
 import { useUser } from 'contexts'
@@ -19,13 +20,42 @@ const LoginScreen = () => {
   useEffect(() => {
     signInAnonymously(auth)
       .then(async () => {
-        const querySnapshot = await getDocs(collection(db, 'users'))
-        querySnapshot.forEach((doc) => {
-          const data = doc.data()
-          listAvailableUser.push(data)
-        })
+        try {
+          const storedUserId = JSON.parse(await AsyncStorage.getItem('userId'))
+          console.log('userId:', storedUserId)
+          const querySnapshot = await getDocs(collection(db, 'users'))
 
-        setIsReady(true)
+          try {
+            querySnapshot.forEach((doc) => {
+              const data = doc.data()
+
+              const expiredDate = new Date(
+                data.expiredDate.seconds * 1000 +
+                  data.expiredDate.nanoseconds / 1000000
+              )
+              const currentDate = new Date()
+
+              if (expiredDate.getTime() >= currentDate.getTime()) {
+                listAvailableUser.push(data)
+
+                if (storedUserId === data.id) {
+                  throw new Error('')
+                }
+              } else {
+                if (storedUserId === data.id) {
+                  AsyncStorage.removeItem('userId')
+                }
+              }
+            })
+
+            setIsReady(true)
+          } catch {
+            setIsReady(true)
+            setIsLogin(true)
+          }
+        } catch {
+          //
+        }
       })
       .catch((error) => {
         const errorCode = error.code
@@ -61,8 +91,10 @@ const LoginScreen = () => {
             console.log(data)
 
             try {
-              listAvailableUser.forEach((user) => {
+              listAvailableUser.forEach(async (user) => {
                 if (data === user.id) {
+                  await AsyncStorage.setItem('userId', JSON.stringify(user.id))
+
                   setIsLogin(true)
                   throw new Error()
                 }
