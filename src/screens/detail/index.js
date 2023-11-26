@@ -6,6 +6,7 @@ import {
 } from 'components/card'
 import { CircleIcon, Icon } from 'components/icons'
 import { keygen } from 'components/keygen'
+import { LoadingModal, useLoadingModal } from 'components/loading-modal'
 import { useCatagoryVerticalScroll } from 'components/vscroll'
 import {
   BORDER_COLOR,
@@ -97,6 +98,7 @@ const DetailScreen = () => {
     audioUri: item.audioUri,
     text: item.text,
   })
+  const { setVisible } = useLoadingModal()
 
   useEffect(() => {
     if (state.audioUri) {
@@ -218,6 +220,7 @@ const DetailScreen = () => {
   }
 
   const onPressSubmit = async () => {
+    setVisible(true)
     const [imageUri, audioUri] = await uploadStorageAllAsync({
       id: id,
       key: state.key,
@@ -244,11 +247,28 @@ const DetailScreen = () => {
       await setDoc(doc(db, id, 'catagory'), {
         data: catagoryRef.current?.data,
       })
-
-      navigation.goBack()
     } catch (error) {
       console.log('[error] onPressSubmit:', error)
     }
+    navigation.goBack()
+    setVisible(false)
+  }
+
+  const onPressDelete = async () => {
+    setVisible(true)
+
+    catagoryRef.current?.remove(index)
+
+    try {
+      await setDoc(doc(db, id, 'catagory'), {
+        data: catagoryRef.current?.data,
+      })
+    } catch (error) {
+      console.log('[error] onPressDelete:', error)
+    }
+    navigation.goBack()
+
+    setVisible(false)
   }
 
   return (
@@ -404,6 +424,22 @@ const DetailScreen = () => {
               iconColor={submitable ? 'green' : DISABLE_COLOR}
             />
           </TouchableOpacity>
+
+          {catagoryRef?.current.data.length - 1 >= index && (
+            <TouchableOpacity
+              onPress={onPressDelete}
+              disabled={submitable ? false : true}
+            >
+              <CircleIcon
+                name='ios-close-outline'
+                style={{
+                  margin: CARD_MARGIN,
+                  backgroundColor: 'rgba(128,0,0,0.1)',
+                }}
+                iconColor='red'
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
 
@@ -452,6 +488,7 @@ const DetailScreen = () => {
           </SafeAreaView>
         </SafeAreaProvider>
       </Modal>
+      <LoadingModal />
     </>
   )
 }

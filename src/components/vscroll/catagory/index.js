@@ -58,7 +58,9 @@ export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
 
   const remove = (index) => {
     setData((prevData) => {
-      return [...prevData.splice(index, 1)]
+      return prevData.filter((v, i) => {
+        return i != index
+      })
     })
   }
 

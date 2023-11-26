@@ -8,6 +8,7 @@ import {
 import { CommCardPlaySoundPressable } from 'components/card/comm/play-sound-pressable'
 import { StackHorizontalScrollView } from 'components/hscroll'
 import { CircleIcon } from 'components/icons'
+import { LoadingModal, useLoadingModal } from 'components/loading-modal'
 import { HSeparator } from 'components/separator'
 import {
   CatagoryVerticalScrollView,
@@ -43,9 +44,12 @@ const HomeScreen = () => {
   const stackRef = useRef()
   const { ref: catagoryRef } = useCatagoryVerticalScroll()
   const { id } = useUser()
+  const { setVisible } = useLoadingModal()
 
   useLayoutEffect(() => {
     const getData = async () => {
+      setVisible(true)
+
       const docSnap = await getDoc(doc(db, id, 'catagory'))
 
       if (docSnap.exists()) {
@@ -53,6 +57,7 @@ const HomeScreen = () => {
 
         catagoryRef.current?.init(data.data)
       }
+      setVisible(false)
     }
 
     getData()
@@ -115,43 +120,46 @@ const HomeScreen = () => {
   }, [])
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          width: '100%',
-          flexDirection: 'row',
-          paddingHorizontal: PADDING,
-        }}
-      >
-        <View style={{ flex: 1 }} />
-
-        <TouchableOpacity
-          onPress={backspaceOnPress}
-          onLongPress={backspaceOnLongPress}
+    <>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            paddingHorizontal: PADDING,
+          }}
         >
-          <CircleIcon
-            name='ios-backspace-outline'
-            style={{ margin: PADDING, marginBottom: 0 }}
+          <View style={{ flex: 1 }} />
+
+          <TouchableOpacity
+            onPress={backspaceOnPress}
+            onLongPress={backspaceOnLongPress}
+          >
+            <CircleIcon
+              name='ios-backspace-outline'
+              style={{ margin: PADDING, marginBottom: 0 }}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ width: '100%', padding: PADDING }}>
+          <StackHorizontalScrollView
+            ref={stackRef}
+            renderItem={StackRenderItem}
           />
-        </TouchableOpacity>
-      </View>
+        </View>
 
-      <View style={{ width: '100%', padding: PADDING }}>
-        <StackHorizontalScrollView
-          ref={stackRef}
-          renderItem={StackRenderItem}
-        />
-      </View>
+        <HSeparator />
 
-      <HSeparator />
-
-      <View style={{ width: '100%', padding: PADDING, flex: 1 }}>
-        <CatagoryVerticalScrollView
-          ref={catagoryRef}
-          renderItem={CatagoryRenderItem}
-        />
-      </View>
-    </SafeAreaView>
+        <View style={{ width: '100%', padding: PADDING, flex: 1 }}>
+          <CatagoryVerticalScrollView
+            ref={catagoryRef}
+            renderItem={CatagoryRenderItem}
+          />
+        </View>
+      </SafeAreaView>
+      <LoadingModal />
+    </>
   )
 }
 

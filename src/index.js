@@ -1,3 +1,4 @@
+import { LoadingModal, LoadingModalProvider } from 'components/loading-modal'
 import { CatagoryVerticalScrollProvider } from 'components/vscroll'
 import { UserProvider } from 'contexts'
 import { StatusBar } from 'expo-status-bar'
@@ -7,9 +8,11 @@ const AppProvider = ({ children }) => {
   return (
     <>
       <UserProvider>
-        <CatagoryVerticalScrollProvider>
-          {children}
-        </CatagoryVerticalScrollProvider>
+        <LoadingModalProvider>
+          <CatagoryVerticalScrollProvider>
+            {children}
+          </CatagoryVerticalScrollProvider>
+        </LoadingModalProvider>
       </UserProvider>
     </>
   )
