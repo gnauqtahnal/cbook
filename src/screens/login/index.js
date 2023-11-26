@@ -22,7 +22,7 @@ const LoginScreen = () => {
       .then(async () => {
         try {
           const storedUserId = JSON.parse(await AsyncStorage.getItem('userId'))
-          console.log('userId:', storedUserId)
+          // console.log('userId:', storedUserId)
           setId(storedUserId)
           const querySnapshot = await getDocs(collection(db, 'users'))
 
@@ -77,7 +77,8 @@ const LoginScreen = () => {
       <Text>Login</Text>
 
       <TouchableOpacity
-        onPress={() => {
+        onPress={async () => {
+          await BarCodeScanner.requestPermissionsAsync()
           setOpenScanner(true)
         }}
       >

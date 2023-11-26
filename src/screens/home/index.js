@@ -14,7 +14,16 @@ import {
   useCatagoryVerticalScroll,
 } from 'components/vscroll'
 import { CARD_MARGIN, ICON_SIZE, PADDING } from 'constants'
-import { useCallback, useRef } from 'react'
+import { useUser } from 'contexts'
+import { db } from 'firebase'
+import { doc, getDoc } from 'firebase/firestore'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -33,6 +42,21 @@ const HomeScreen = () => {
   const navigation = useNavigation()
   const stackRef = useRef()
   const { ref: catagoryRef } = useCatagoryVerticalScroll()
+  const { id } = useUser()
+
+  useLayoutEffect(() => {
+    const getData = async () => {
+      const docSnap = await getDoc(doc(db, id, 'catagory'))
+
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+
+        catagoryRef.current?.init(data.data)
+      }
+    }
+
+    getData()
+  }, [])
 
   const CatagoryRenderItem = ({ item, index }) => {
     const onPressPushToStack = () => {

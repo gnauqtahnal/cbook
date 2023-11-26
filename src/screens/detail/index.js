@@ -39,11 +39,6 @@ const imagePickerOptions = {
   quality: 1,
 }
 
-const uploadDbAsync = async (path, data) => {
-  const ref = doc(db, path)
-  await setDoc(ref, data, { merge: true })
-}
-
 const uploadStorageAllAsync = async ({ id, key, imageUri, audioUri }) => {
   const getFileType = (uri) => {
     const uriParts = uri.split('.')
@@ -54,13 +49,13 @@ const uploadStorageAllAsync = async ({ id, key, imageUri, audioUri }) => {
   const uploadImage = async () => {
     const type = getFileType(imageUri)
     const path = `${id}/image_${key}.${type}`
-    await uploadStorageAsync(path, imageUri)
+    return await uploadStorageAsync(path, imageUri)
   }
 
   const uploadAudio = async () => {
     const type = getFileType(audioUri)
     const path = `${id}/audio_${key}.${type}`
-    await uploadStorageAsync(path, audioUri)
+    return await uploadStorageAsync(path, audioUri)
   }
 
   return await Promise.all([uploadImage(), uploadAudio()])
@@ -229,23 +224,31 @@ const DetailScreen = () => {
       imageUri: state.imageUri,
       audioUri: state.audioUri,
     })
-    // const data = JSON.stringify({
-    //   index: {
-    //     text: state.text,
-    //     imageUri: imageUri,
-    //     audioUri: audioUri,
-    //   },
-    // })
-    // const path = `${id}`
-    // await uploadDbAsync(path, data)
+    try {
+      await setDoc(
+        doc(db, 'data', state.key),
+        {
+          text: state.text || '',
+          imageUri: imageUri || '',
+          audioUri: audioUri || '',
+        },
+        { merge: true }
+      )
 
-    if (index >= catagoryRef.current?.data.length) {
-      catagoryRef.current?.push(state)
-    } else {
-      catagoryRef.current?.update(index, state)
+      if (index >= catagoryRef.current?.data.length) {
+        catagoryRef.current?.push(state)
+      } else {
+        catagoryRef.current?.update(index, state)
+      }
+
+      await setDoc(doc(db, id, 'catagory'), {
+        data: catagoryRef.current?.data,
+      })
+
+      navigation.goBack()
+    } catch (error) {
+      console.log('[error] onPressSubmit:', error)
     }
-
-    navigation.goBack()
   }
 
   return (

@@ -40,6 +40,10 @@ export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
     setExtraData([...data, {}])
   }, [data])
 
+  const init = (array) => {
+    setData(array)
+  }
+
   const push = (element) => {
     setData((prevData) => {
       return [...prevData, element]
@@ -69,6 +73,7 @@ export const CatagoryVerticalScrollView = forwardRef(({ renderItem }, ref) => {
   useImperativeHandle(ref, () => {
     return {
       data,
+      init,
       push,
       pop,
       remove,

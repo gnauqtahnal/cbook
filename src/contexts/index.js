@@ -14,3 +14,18 @@ export const UserProvider = ({ children }) => {
 export const useUser = () => {
   return useContext(UserContext)
 }
+
+export const CatagoryContext = createContext()
+export const CatagoryProvider = ({ children }) => {
+  const [data, setData] = useState([])
+
+  const value = useMemo(() => {
+    return { data, setData }
+  }, [data, setData])
+
+  return (
+    <CatagoryContext.Provider value={value}>
+      {children}
+    </CatagoryContext.Provider>
+  )
+}
