@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CircleIcon } from 'components/icons'
 import { PADDING } from 'constants'
 import { useUser } from 'contexts'
-import { BarCodeScanner } from 'expo-barcode-scanner'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 import { auth, db } from 'firebase'
 import { signInAnonymously } from 'firebase/auth'
 import { collection, getDocs } from 'firebase/firestore'
@@ -16,6 +16,7 @@ const LoginScreen = () => {
   const [isReady, setIsReady] = useState(false)
   const [openScanner, setOpenScanner] = useState(false)
   const { setIsLogin, setId } = useUser()
+  const [status, requestPermission] = useCameraPermissions()
 
   useEffect(() => {
     signInAnonymously(auth)
@@ -78,7 +79,7 @@ const LoginScreen = () => {
 
       <TouchableOpacity
         onPress={async () => {
-          await BarCodeScanner.requestPermissionsAsync()
+          requestPermission()
           setOpenScanner(true)
         }}
       >
@@ -89,7 +90,10 @@ const LoginScreen = () => {
       </TouchableOpacity>
 
       {openScanner && (
-        <BarCodeScanner
+        <CameraView
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'],
+          }}
           onBarCodeScanned={({ data }) => {
             console.log(data)
 
